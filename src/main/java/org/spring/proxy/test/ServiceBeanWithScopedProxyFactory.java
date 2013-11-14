@@ -1,5 +1,7 @@
 package org.spring.proxy.test;
 
+import static org.spring.proxy.test.ThreadScope.THREAD_SCOPE;
+
 import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -9,13 +11,21 @@ import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionReaderUtils;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.ApplicationContext;
 
-public class ThreadScopedBeansWithScopeProxyBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+/**
+ * Erzeugt Service Beans mit einem Scoped Proxy und registriert diese im
+ * {@link ApplicationContext}.
+ * 
+ * @author Olaf Siefart, Senacor Technologies AG
+ * 
+ */
+public class ServiceBeanWithScopedProxyFactory implements BeanFactoryPostProcessor {
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ThreadScopedBean.class);
-        builder.setScope("thread");
+        BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Service.class);
+        builder.setScope(THREAD_SCOPE);
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
         BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(beanDefinition, "threadScopedBean");
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;

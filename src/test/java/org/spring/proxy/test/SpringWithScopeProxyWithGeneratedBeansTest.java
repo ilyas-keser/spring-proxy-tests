@@ -1,9 +1,9 @@
 package org.spring.proxy.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.spring.proxy.test.ThreadScope.THREAD_SCOPE;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -13,77 +13,74 @@ import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = SpringWithScopeProxyWithGeneratedBeansTest.TestConfiguration.class)
-public class SpringWithScopeProxyWithGeneratedBeansTest {
-
-    @Autowired
-    private SingletonScopedBean testSingletonScopeClass;
+public class SpringWithScopeProxyWithGeneratedBeansTest extends BaseTest {
 
     @Autowired
     private ApplicationContext applicationContext;
 
-    @Autowired
-    private ThreadScope threadScope;
-
     @Test
-    public void testWithScopedProxy() {
-        assertEquals(0, threadScope.getBeans().size());
+    public void testServiceCall() {
 
-        CallingBeanMethodRunnable runnable1 = new CallingBeanMethodRunnable(applicationContext);
-        Thread thread1 = new Thread(runnable1);
-        thread1.start();
+        CallingRetrievalServiceRunnable runnable1 = new CallingRetrievalServiceRunnable(1L, applicationContext);
+        startAndWait(new Thread(runnable1));
 
-        CallingBeanMethodRunnable runnable2 = new CallingBeanMethodRunnable(applicationContext);
-        Thread thread2 = new Thread(runnable2);
-        thread2.start();
+        CallingRetrievalServiceRunnable runnable2 = new CallingRetrievalServiceRunnable(2L, applicationContext);
+        startAndWait(new Thread(runnable2));
 
-        do {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } while (thread1.isAlive() || thread2.isAlive());
+        assertEquals(1L, runnable1.getServiceCallResult().getCallerId());
+        assertEquals(2L, runnable2.getServiceCallResult().getCallerId());
 
-        // Prüfen, das auf unterschiedlichen Instanzen gearbeitet wird
-        List<ThreadScopedBean> threadScopedBeans = threadScope.getBeansForType(ThreadScopedBean.class);
-        assertEquals(2, threadScopedBeans.size());
+        // Nachweisen, das der gleiche Service zwei mal aufgerufen wurde
+        assertEquals(1L, runnable1.getServiceCallResult().getCount());
+        assertEquals(1L, runnable2.getServiceCallResult().getCount());
 
-        for (ThreadScopedBean threadScopedBean : threadScopedBeans) {
-            assertEquals(1, threadScopedBean.getCount());
-
-        }
     }
 
     @Configuration
+    @EnableAspectJAutoProxy
     public static class TestConfiguration {
 
         @Bean
-        public SingletonScopedBean singletonScopedBean() {
-            return new SingletonScopedBean();
+        public RetrievalService retrievalService() {
+            return new RetrievalService();
         }
 
         @Bean
-        public ThreadScopedBeansWithScopeProxyBeanFactoryPostProcessor threadScopedBean() {
-            return new ThreadScopedBeansWithScopeProxyBeanFactoryPostProcessor();
+        public ServiceBeanWithScopedProxyFactory serviceBeanWithScopedProxyFactory() {
+            return new ServiceBeanWithScopedProxyFactory();
         }
 
         @Bean
-        public CustomScopeConfigurer createSessionScope() {
+        public CustomScopeConfigurer customScopeConfigurer() {
             Map<String, Object> scopes = new HashMap<String, Object>();
-            scopes.put("thread", createTestScope());
+            scopes.put(THREAD_SCOPE, threadScope());
             CustomScopeConfigurer customScopeConfigurer = new CustomScopeConfigurer();
             customScopeConfigurer.setScopes(scopes);
             return customScopeConfigurer;
         }
 
         @Bean
-        public ThreadScope createTestScope() {
+        @Scope(value = THREAD_SCOPE)
+        public CallerIdAspect callerIdAspect() {
+            return new CallerIdAspect();
+        }
+
+        @Bean
+        public ThreadScope threadScope() {
             return new ThreadScope();
+        }
+
+        @Bean
+        @Scope(value = THREAD_SCOPE)
+        public CallerId callerId() {
+            return new CallerId();
         }
 
     }

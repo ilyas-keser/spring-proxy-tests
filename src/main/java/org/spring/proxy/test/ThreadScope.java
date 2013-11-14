@@ -7,7 +7,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.ObjectFactory;
 
+/**
+ * Eigener ThreadScope, der die Beans in Maps verwaltet, die der Id des Thread
+ * zugeordnet sind und die man von außen abfragen kann.
+ * 
+ * @author Olaf Siefart, Senacor Technologies AG
+ * 
+ */
 public class ThreadScope implements org.springframework.beans.factory.config.Scope {
+
+    public static final String THREAD_SCOPE = "thread";
 
     private final Map<Long, Map<String, Object>> beans = new ConcurrentHashMap<Long, Map<String, Object>>();
 

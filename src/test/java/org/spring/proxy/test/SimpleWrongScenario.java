@@ -13,14 +13,22 @@ import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+/**
+ * Verschalten eines RetrievalServices im Singleton Scope mit einem Service im
+ * Thread Scope. Es wird kein ScopeProxy generiert.
+ * 
+ * Fehlerszenario mit Aufrufen auf der falschen ServiceBean
+ * 
+ * @author Olaf Siefart, Senacor Technologies AG
+ * 
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = SpringNoProxyWithGeneratedBeansTest.TestConfiguration.class)
-public class SpringNoProxyWithGeneratedBeansTest extends BaseTest {
+@ContextConfiguration(classes = SimpleWrongScenario.TestConfiguration.class)
+public class SimpleWrongScenario extends BaseTest {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -34,8 +42,8 @@ public class SpringNoProxyWithGeneratedBeansTest extends BaseTest {
         CallingRetrievalServiceRunnable runnable2 = new CallingRetrievalServiceRunnable(2L, applicationContext);
         startAndWait(new Thread(runnable2));
 
-        assertEquals(1L, runnable1.getServiceCallResult().getCallerId());
-        assertEquals(1L, runnable2.getServiceCallResult().getCallerId());
+        assertEquals(-1L, runnable1.getServiceCallResult().getCallerId());
+        assertEquals(-1L, runnable2.getServiceCallResult().getCallerId());
 
         // Nachweisen, das der gleiche Service zwei mal aufgerufen wurde
         assertEquals(1L, runnable1.getServiceCallResult().getCount());
@@ -44,7 +52,6 @@ public class SpringNoProxyWithGeneratedBeansTest extends BaseTest {
     }
 
     @Configuration
-    @EnableAspectJAutoProxy
     public static class TestConfiguration {
 
         @Bean
@@ -53,23 +60,18 @@ public class SpringNoProxyWithGeneratedBeansTest extends BaseTest {
         }
 
         @Bean
-        public ServiceBeanWithoutScopedProxyFactory serviceBeanWithoutScopedProxyFactory() {
-            return new ServiceBeanWithoutScopedProxyFactory();
+        @Scope(value = THREAD_SCOPE)
+        public Service service() {
+            return new Service();
         }
 
         @Bean
-        public CustomScopeConfigurer createSessionScope() {
+        public CustomScopeConfigurer threadScopeConfigurer() {
             Map<String, Object> scopes = new HashMap<String, Object>();
             scopes.put(THREAD_SCOPE, threadScope());
             CustomScopeConfigurer customScopeConfigurer = new CustomScopeConfigurer();
             customScopeConfigurer.setScopes(scopes);
             return customScopeConfigurer;
-        }
-
-        @Bean
-        @Scope(value = THREAD_SCOPE)
-        public CallerIdAspect callerIdAspect() {
-            return new CallerIdAspect();
         }
 
         @Bean
@@ -82,6 +84,7 @@ public class SpringNoProxyWithGeneratedBeansTest extends BaseTest {
         public CallerId callerId() {
             return new CallerId();
         }
+
     }
 
 }
