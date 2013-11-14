@@ -23,21 +23,21 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class SpringAspectWithScopedProxyTest {
 
     @Autowired
-    private TestSingletonScopeClass testSingletonScopeClass;
+    private SingletonScopedBean testSingletonScopeClass;
 
     @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
-    private TestScope testScope;
+    private ThreadScope threadScope;
 
     @Test
     public void testScopedInCombinWithAspect() {
-        assertEquals(0, testScope.getBeans().size());
-        testSingletonScopeClass.getTestSessionScopeClass().doSomething();
-        assertEquals(1, testScope.getBeans().size());
+        assertEquals(0, threadScope.getBeans().size());
+        testSingletonScopeClass.getThreadScopedBean().doSomething();
+        assertEquals(1, threadScope.getBeans().size());
 
-        TestRunnable runnable = new TestRunnable(applicationContext);
+        CallingBeanMethodRunnable runnable = new CallingBeanMethodRunnable(applicationContext);
         Thread thread = new Thread(runnable);
         thread.start();
 
@@ -49,7 +49,7 @@ public class SpringAspectWithScopedProxyTest {
             }
         } while (thread.isAlive());
 
-        assertEquals(2, testScope.getBeans().size());
+        assertEquals(2, threadScope.getBeans().size());
 
     }
 
@@ -58,14 +58,14 @@ public class SpringAspectWithScopedProxyTest {
     public static class TestConfiguration {
 
         @Bean
-        public TestSingletonScopeClass singletonScope() {
-            return new TestSingletonScopeClass();
+        public SingletonScopedBean singletonScope() {
+            return new SingletonScopedBean();
         }
 
         @Bean
         @Scope(value = "thread", proxyMode = ScopedProxyMode.TARGET_CLASS)
-        public TestThreadScopeClass sessionScope() {
-            return new TestThreadScopeClass();
+        public ThreadScopedBean sessionScope() {
+            return new ThreadScopedBean();
         }
 
         @Bean
@@ -78,13 +78,13 @@ public class SpringAspectWithScopedProxyTest {
         }
 
         @Bean
-        public TestScope createTestScope() {
-            return new TestScope();
+        public ThreadScope createTestScope() {
+            return new ThreadScope();
         }
 
         @Bean
-        public TestAspect createTestAspect() {
-            return new TestAspect();
+        public NoOpAspect createTestAspect() {
+            return new NoOpAspect();
         }
 
     }

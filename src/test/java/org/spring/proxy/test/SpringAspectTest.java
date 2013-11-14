@@ -1,6 +1,6 @@
 package org.spring.proxy.test;
 
-import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,11 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.support.SimpleThreadScope;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -22,11 +22,36 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class SpringAspectTest {
 
     @Autowired
-    private TestSingletonScopeClass testSingletonScopeClass;
+    private SingletonScopedBean testSingletonScopeClass;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private ThreadScope threadScope;
 
     @Test
-    public void testWithAspect() {
-        assertNotSame(testSingletonScopeClass.getTestSessionScopeClass().getClass(), TestThreadScopeClass.class);
+    public void testWithAspectWithoutScopeProxy() {
+        assertEquals(1, threadScope.getBeans().size());
+
+        CallingBeanMethodRunnable runnable1 = new CallingBeanMethodRunnable(applicationContext);
+        Thread thread1 = new Thread(runnable1);
+        thread1.start();
+
+        CallingBeanMethodRunnable runnable2 = new CallingBeanMethodRunnable(applicationContext);
+        Thread thread2 = new Thread(runnable2);
+        thread2.start();
+
+        do {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (thread1.isAlive() || thread2.isAlive());
+
+        assertEquals(1, threadScope.getBeans().size());
+
     }
 
     @Configuration
@@ -34,30 +59,34 @@ public class SpringAspectTest {
     public static class TestConfiguration {
 
         @Bean
-        public TestSingletonScopeClass singletonScope() {
-            return new TestSingletonScopeClass();
+        public SingletonScopedBean singletonScope() {
+            return new SingletonScopedBean();
         }
 
         @Bean
         @Scope(value = "thread")
-        public TestThreadScopeClass sessionScope() {
-            return new TestThreadScopeClass();
+        public ThreadScopedBean sessionScope() {
+            return new ThreadScopedBean();
         }
 
         @Bean
-        public static CustomScopeConfigurer createSessionScope() {
+        public CustomScopeConfigurer createSessionScope() {
             Map<String, Object> scopes = new HashMap<String, Object>();
-            scopes.put("thread", new SimpleThreadScope());
+            scopes.put("thread", createTestScope());
             CustomScopeConfigurer customScopeConfigurer = new CustomScopeConfigurer();
             customScopeConfigurer.setScopes(scopes);
             return customScopeConfigurer;
         }
 
         @Bean
-        public TestAspect createTestAspect() {
-            return new TestAspect();
+        public ThreadScope createTestScope() {
+            return new ThreadScope();
         }
 
+        @Bean
+        public NoOpAspect createTestAspect() {
+            return new NoOpAspect();
+        }
     }
 
 }

@@ -1,13 +1,13 @@
 package org.spring.proxy.test;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.ObjectFactory;
 
-public class TestScope implements org.springframework.beans.factory.config.Scope {
+public class ThreadScope implements org.springframework.beans.factory.config.Scope {
 
-    private final Map<Long, Map<String, Object>> beans = new HashMap<Long, Map<String, Object>>();
+    private final Map<Long, Map<String, Object>> beans = new ConcurrentHashMap<Long, Map<String, Object>>();
 
     @Override
     public Object get(String name, ObjectFactory<?> objectFactory) {
@@ -15,7 +15,7 @@ public class TestScope implements org.springframework.beans.factory.config.Scope
 
         Map<String, Object> scopedBeans = beans.get(threadId);
         if (scopedBeans == null) {
-            scopedBeans = new HashMap<String, Object>();
+            scopedBeans = new ConcurrentHashMap<String, Object>();
             beans.put(threadId, scopedBeans);
         }
 

@@ -12,8 +12,6 @@ import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -23,23 +21,23 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class SpringNoProxyTest {
 
     @Autowired
-    private TestSingletonScopeClass testSingletonScopeClass;
+    private SingletonScopedBean testSingletonScopeClass;
 
     @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
-    private TestScope testScope;
+    private ThreadScope threadScope;
 
     @Test
     public void testSharingSameInstanceIfWithoutScopedProxy() {
-        assertEquals(1, testScope.getBeans().size());
+        assertEquals(1, threadScope.getBeans().size());
 
-        TestRunnable runnable1 = new TestRunnable(applicationContext);
+        CallingBeanMethodRunnable runnable1 = new CallingBeanMethodRunnable(applicationContext);
         Thread thread1 = new Thread(runnable1);
         thread1.start();
 
-        TestRunnable runnable2 = new TestRunnable(applicationContext);
+        CallingBeanMethodRunnable runnable2 = new CallingBeanMethodRunnable(applicationContext);
         Thread thread2 = new Thread(runnable2);
         thread2.start();
 
@@ -51,24 +49,22 @@ public class SpringNoProxyTest {
             }
         } while (thread1.isAlive() || thread2.isAlive());
 
-        assertEquals(1, testScope.getBeans().size());
+        assertEquals(1, threadScope.getBeans().size());
 
     }
 
     @Configuration
-    @EnableAspectJAutoProxy
     public static class TestConfiguration {
 
         @Bean
-        public TestSingletonScopeClass singletonScope() {
-            return new TestSingletonScopeClass();
+        public SingletonScopedBean singletonScopedBean() {
+            return new SingletonScopedBean();
         }
 
         @Bean
         @Scope(value = "thread")
-        @Lazy
-        public TestThreadScopeClass sessionScope() {
-            return new TestThreadScopeClass();
+        public ThreadScopedBean threadScopedBean() {
+            return new ThreadScopedBean();
         }
 
         @Bean
@@ -81,8 +77,8 @@ public class SpringNoProxyTest {
         }
 
         @Bean
-        public TestScope createTestScope() {
-            return new TestScope();
+        public ThreadScope createTestScope() {
+            return new ThreadScope();
         }
 
     }

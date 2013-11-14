@@ -24,23 +24,23 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 public class SpringProxyTest {
 
     @Autowired
-    private TestSingletonScopeClass testSingletonScopeClass;
+    private SingletonScopedBean testSingletonScopeClass;
 
     @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
-    private TestScope testScope;
+    private ThreadScope threadScope;
 
     @Test
     public void testSharingSameInstanceIfWithoutScopedProxy() {
-        assertEquals(0, testScope.getBeans().size());
+        assertEquals(0, threadScope.getBeans().size());
 
-        TestRunnable runnable1 = new TestRunnable(applicationContext);
+        CallingBeanMethodRunnable runnable1 = new CallingBeanMethodRunnable(applicationContext);
         Thread thread1 = new Thread(runnable1);
         thread1.start();
 
-        TestRunnable runnable2 = new TestRunnable(applicationContext);
+        CallingBeanMethodRunnable runnable2 = new CallingBeanMethodRunnable(applicationContext);
         Thread thread2 = new Thread(runnable2);
         thread2.start();
 
@@ -53,9 +53,9 @@ public class SpringProxyTest {
         } while (thread1.isAlive() || thread2.isAlive());
 
         // Prüfen, das auf unterschiedlichen Instanzen gearbeitet wird
-        assertEquals(2, testScope.getBeans().size());
+        assertEquals(2, threadScope.getBeans().size());
 
-        Iterator<Map<String, Object>> iterator = testScope.getBeans().values().iterator();
+        Iterator<Map<String, Object>> iterator = threadScope.getBeans().values().iterator();
         Map<String, Object> beans1 = iterator.next();
         assertEquals(1, beans1.size());
         Map<String, Object> beans2 = iterator.next();
@@ -69,14 +69,14 @@ public class SpringProxyTest {
     public static class TestConfiguration {
 
         @Bean
-        public TestSingletonScopeClass singletonScope() {
-            return new TestSingletonScopeClass();
+        public SingletonScopedBean singletonScope() {
+            return new SingletonScopedBean();
         }
 
         @Bean
         @Scope(value = "thread", proxyMode = ScopedProxyMode.TARGET_CLASS)
-        public TestThreadScopeClass sessionScope() {
-            return new TestThreadScopeClass();
+        public ThreadScopedBean sessionScope() {
+            return new ThreadScopedBean();
         }
 
         @Bean
@@ -89,8 +89,8 @@ public class SpringProxyTest {
         }
 
         @Bean
-        public TestScope createTestScope() {
-            return new TestScope();
+        public ThreadScope createTestScope() {
+            return new ThreadScope();
         }
 
     }
