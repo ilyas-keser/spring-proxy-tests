@@ -28,8 +28,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = SimpleRightScenario.TestConfiguration.class)
-public class SimpleRightScenario extends BaseTest {
+@ContextConfiguration(classes = SimpleRightScenarioTest.TestConfiguration.class)
+public class SimpleRightScenarioTest extends BaseTest {
 
     @Autowired
     private ApplicationContext applicationContext;

@@ -13,24 +13,22 @@ import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * In diesem Testfall liegt der Service selber im Singleton Scope und der Aspekt
- * im {@link ThreadScope} und der ScopedProxy hilft auch nicht.
+ * Verschalten eines RetrievalServices im Singleton Scope mit einem Service im
+ * Thread Scope. Es wird kein ScopeProxy generiert.
  * 
- * Fehlerszenario mit Aufrufen unter der falschen {@link CallerId}.
+ * Fehlerszenario mit Aufrufen auf der falschen ServiceBean
  * 
  * @author Olaf Siefart, Senacor Technologies AG
  * 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = CopyOfAspectMixedWrongScenario.TestConfiguration.class)
-public class CopyOfAspectMixedWrongScenario extends BaseTest {
+@ContextConfiguration(classes = SimpleWrongScenarioTest.TestConfiguration.class)
+public class SimpleWrongScenarioTest extends BaseTest {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -44,18 +42,16 @@ public class CopyOfAspectMixedWrongScenario extends BaseTest {
         CallingRetrievalServiceRunnable runnable2 = new CallingRetrievalServiceRunnable(2L, applicationContext);
         startAndWait(new Thread(runnable2));
 
-        // Nachweisen, das die Service-Results die gleiche CallerId enthalten
-        assertEquals(1L, runnable1.getServiceCallResult().getCallerId());
-        assertEquals(1L, runnable2.getServiceCallResult().getCallerId());
+        assertEquals(-1L, runnable1.getServiceCallResult().getCallerId());
+        assertEquals(-1L, runnable2.getServiceCallResult().getCallerId());
 
-        // Nachweisen, das der Service zwei mal aufgerufen wurde
+        // Nachweisen, das der gleiche Service zwei mal aufgerufen wurde
         assertEquals(1L, runnable1.getServiceCallResult().getCount());
         assertEquals(2L, runnable2.getServiceCallResult().getCount());
 
     }
 
     @Configuration
-    @EnableAspectJAutoProxy
     public static class TestConfiguration {
 
         @Bean
@@ -64,7 +60,7 @@ public class CopyOfAspectMixedWrongScenario extends BaseTest {
         }
 
         @Bean
-        @Scope(value = "singleton", proxyMode = ScopedProxyMode.TARGET_CLASS)
+        @Scope(value = THREAD_SCOPE)
         public Service service() {
             return new Service();
         }
@@ -81,12 +77,6 @@ public class CopyOfAspectMixedWrongScenario extends BaseTest {
         @Bean
         public ThreadScope threadScope() {
             return new ThreadScope();
-        }
-
-        @Bean
-        @Scope(value = THREAD_SCOPE)
-        public CallerIdAspect callerIdAspect() {
-            return new CallerIdAspect();
         }
 
         @Bean

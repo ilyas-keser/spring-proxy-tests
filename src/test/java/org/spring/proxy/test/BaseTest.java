@@ -1,6 +1,6 @@
 package org.spring.proxy.test;
 
-public class BaseTest {
+public abstract class BaseTest {
 
     protected void startAndWait(Thread thread) {
         thread.start();

@@ -8,28 +8,24 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.aop.framework.AdvisedSupport;
+import org.springframework.aop.framework.DefaultAopProxyFactory;
+import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.CustomScopeConfigurer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-/**
- * In diesem Testfall liegt der Service selber im {@link ThreadScope} mit seinem
- * Aspekt und ist über einen ScopedProxy geschützt. Klassischer Spring-Weg ohne
- * Fehler.
- * 
- * @author Olaf Siefart, Senacor Technologies AG
- * 
- */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = AspectRightScenario.TestConfiguration.class)
-public class AspectRightScenario extends BaseTest {
+@ContextConfiguration(classes = AspectMixedRightScenarioWithAdditionalProxyTest.TestConfiguration.class)
+public class AspectMixedRightScenarioWithAdditionalProxyTest extends BaseTest {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -47,9 +43,9 @@ public class AspectRightScenario extends BaseTest {
         assertEquals(1L, runnable1.getServiceCallResult().getCallerId());
         assertEquals(2L, runnable2.getServiceCallResult().getCallerId());
 
-        // Beide Service-Instanzen müssen jeweils einmal aufgerufen worden sein
+        // Die eine Service-Instanz muss zweimmal aufgerufen worden sein
         assertEquals(1L, runnable1.getServiceCallResult().getCount());
-        assertEquals(1L, runnable2.getServiceCallResult().getCount());
+        assertEquals(2L, runnable2.getServiceCallResult().getCount());
 
     }
 
@@ -63,7 +59,6 @@ public class AspectRightScenario extends BaseTest {
         }
 
         @Bean
-        @Scope(value = THREAD_SCOPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
         public Service service() {
             return new Service();
         }
@@ -84,8 +79,25 @@ public class AspectRightScenario extends BaseTest {
 
         @Bean
         @Scope(value = THREAD_SCOPE)
-        public CallerIdAspect callerIdAspect() {
-            return new CallerIdAspect();
+        public CallerIdMethodInterceptor callerIdMethodInterceptor() {
+            return new CallerIdMethodInterceptor();
+        }
+
+        @Bean
+        @Scope(value = "thread", proxyMode = ScopedProxyMode.TARGET_CLASS)
+        @Primary
+        public Service threadScopedProyBean() {
+            Service service = service();
+            Class<?>[] classes = {};
+            AdvisedSupport config = new AdvisedSupport(classes);
+            config.setProxyTargetClass(true);
+            config.setTargetClass(Service.class);
+            config.setTargetSource(new SingletonTargetSource(service));
+            CallerIdMethodInterceptor callerIdMethodInterceptor = callerIdMethodInterceptor();
+            config.addAdvice(callerIdMethodInterceptor);
+            DefaultAopProxyFactory factory = new DefaultAopProxyFactory();
+            Service serviceProxy = (Service) factory.createAopProxy(config).getProxy();
+            return serviceProxy;
         }
 
         @Bean

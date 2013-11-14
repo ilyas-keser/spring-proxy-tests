@@ -30,8 +30,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  * 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = AspectMixedRightScenario.TestConfiguration.class)
-public class AspectMixedRightScenario extends BaseTest {
+@ContextConfiguration(classes = AspectMixedRightScenarioTest.TestConfiguration.class)
+public class AspectMixedRightScenarioTest extends BaseTest {
 
     @Autowired
     private ApplicationContext applicationContext;
