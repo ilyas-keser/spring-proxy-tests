@@ -12,8 +12,8 @@ public class ThreadScopedBean {
 
     // Getter / Setter
 
-    public AtomicInteger getCount() {
-        return count;
+    public int getCount() {
+        return count.intValue();
     }
 
 }

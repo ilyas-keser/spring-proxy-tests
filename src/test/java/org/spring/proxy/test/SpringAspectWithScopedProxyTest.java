@@ -3,6 +3,7 @@ package org.spring.proxy.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -49,8 +50,12 @@ public class SpringAspectWithScopedProxyTest {
             }
         } while (thread.isAlive());
 
-        assertEquals(2, threadScope.getBeans().size());
-
+        // Prüfen, das auf unterschiedlichen Instanzen gearbeitet wird
+        List<ThreadScopedBean> threadScopedBeans = threadScope.getBeansForType(ThreadScopedBean.class);
+        assertEquals(2, threadScopedBeans.size());
+        for (ThreadScopedBean threadScopedBean : threadScopedBeans) {
+            assertEquals(1, threadScopedBean.getCount());
+        }
     }
 
     @Configuration

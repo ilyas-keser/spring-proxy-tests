@@ -1,5 +1,7 @@
 package org.spring.proxy.test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -49,6 +51,20 @@ public class ThreadScope implements org.springframework.beans.factory.config.Sco
 
     public Map<Long, Map<String, Object>> getBeans() {
         return beans;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> List<T> getBeansForType(Class<T> clazz) {
+        List<T> result = new ArrayList<T>();
+        for (Map<String, Object> map : beans.values()) {
+            for (Object object : map.values()) {
+                if (clazz.isInstance(object)) {
+                    result.add((T) object);
+                }
+            }
+        }
+
+        return result;
     }
 
 }

@@ -3,6 +3,7 @@ package org.spring.proxy.test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -49,7 +50,9 @@ public class SpringNoProxyTest {
             }
         } while (thread1.isAlive() || thread2.isAlive());
 
-        assertEquals(1, threadScope.getBeans().size());
+        List<ThreadScopedBean> threadScopedBeans = threadScope.getBeansForType(ThreadScopedBean.class);
+        assertEquals(1, threadScopedBeans.size());
+        assertEquals(2, threadScopedBeans.get(0).getCount());
 
     }
 

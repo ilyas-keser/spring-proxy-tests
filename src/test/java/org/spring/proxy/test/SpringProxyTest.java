@@ -1,10 +1,9 @@
 package org.spring.proxy.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
 
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
@@ -53,15 +52,12 @@ public class SpringProxyTest {
         } while (thread1.isAlive() || thread2.isAlive());
 
         // Prüfen, das auf unterschiedlichen Instanzen gearbeitet wird
-        assertEquals(2, threadScope.getBeans().size());
+        List<ThreadScopedBean> threadScopedBeans = threadScope.getBeansForType(ThreadScopedBean.class);
+        assertEquals(2, threadScopedBeans.size());
 
-        Iterator<Map<String, Object>> iterator = threadScope.getBeans().values().iterator();
-        Map<String, Object> beans1 = iterator.next();
-        assertEquals(1, beans1.size());
-        Map<String, Object> beans2 = iterator.next();
-        assertEquals(1, beans2.size());
-
-        assertNotSame(beans1.values().iterator().next(), beans2.values().iterator().next());
+        for (ThreadScopedBean threadScopedBean : threadScopedBeans) {
+            assertEquals(1, threadScopedBean.getCount());
+        }
 
     }
 
