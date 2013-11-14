@@ -7,6 +7,8 @@ public class CallingBeanMethodRunnable implements Runnable {
 
     private final ApplicationContext applicationContext;
 
+    private int doSomething;
+
     @Autowired
     private SingletonScopedBean singletonScopedBean;
 
@@ -17,7 +19,7 @@ public class CallingBeanMethodRunnable implements Runnable {
     @Override
     public void run() {
         applicationContext.getAutowireCapableBeanFactory().autowireBean(this);
-        singletonScopedBean.getThreadScopedBean().doSomething();
+        doSomething = singletonScopedBean.getThreadScopedBean().doSomething();
     }
 
     // Getter / Setter
@@ -26,7 +28,15 @@ public class CallingBeanMethodRunnable implements Runnable {
     }
 
     public void setSingletonScopedBean(SingletonScopedBean testSingletonScopeClass) {
-        this.singletonScopedBean = testSingletonScopeClass;
+        singletonScopedBean = testSingletonScopeClass;
+    }
+
+    public int getDoSomething() {
+        return doSomething;
+    }
+
+    public void setDoSomething(int doSomething) {
+        this.doSomething = doSomething;
     }
 
 }
