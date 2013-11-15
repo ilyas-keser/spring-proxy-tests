@@ -58,9 +58,9 @@ public class SpringWithScopeProxyWithGeneratedBeansTest extends BaseTest {
         }
 
         @Bean
-        public CustomScopeConfigurer customScopeConfigurer() {
+        public CustomScopeConfigurer threadScopeConfigurer() {
             Map<String, Object> scopes = new HashMap<String, Object>();
-            scopes.put(THREAD_SCOPE, threadScope());
+            scopes.put(THREAD_SCOPE, new ThreadScope());
             CustomScopeConfigurer customScopeConfigurer = new CustomScopeConfigurer();
             customScopeConfigurer.setScopes(scopes);
             return customScopeConfigurer;
@@ -70,11 +70,6 @@ public class SpringWithScopeProxyWithGeneratedBeansTest extends BaseTest {
         @Scope(value = THREAD_SCOPE)
         public CallerIdAspect callerIdAspect() {
             return new CallerIdAspect();
-        }
-
-        @Bean
-        public ThreadScope threadScope() {
-            return new ThreadScope();
         }
 
         @Bean

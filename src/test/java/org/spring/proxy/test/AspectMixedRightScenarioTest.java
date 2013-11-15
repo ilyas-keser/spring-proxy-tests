@@ -72,15 +72,10 @@ public class AspectMixedRightScenarioTest extends BaseTest {
         @Bean
         public CustomScopeConfigurer threadScopeConfigurer() {
             Map<String, Object> scopes = new HashMap<String, Object>();
-            scopes.put(THREAD_SCOPE, threadScope());
+            scopes.put(THREAD_SCOPE, new ThreadScope());
             CustomScopeConfigurer customScopeConfigurer = new CustomScopeConfigurer();
             customScopeConfigurer.setScopes(scopes);
             return customScopeConfigurer;
-        }
-
-        @Bean
-        public ThreadScope threadScope() {
-            return new ThreadScope();
         }
 
         @Bean
