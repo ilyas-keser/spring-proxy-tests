@@ -13,7 +13,7 @@ public class ServiceWithScopedProxyBeanDefinitionRegistrar implements ImportBean
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        BeanDefinition bd = new RootBeanDefinition(Service.class);
+        BeanDefinition bd = new RootBeanDefinition(ServiceImpl.class);
         bd.setScope(ThreadScope.THREAD_SCOPE);
         BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(bd, "service");
         BeanDefinitionReaderUtils.registerBeanDefinition(definitionHolder, registry);

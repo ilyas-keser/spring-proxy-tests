@@ -37,7 +37,7 @@ public class SpringWithScopeProxyWithGeneratedBeansTest extends BaseTest {
         assertEquals(1L, runnable1.getServiceCallResult().getCallerId());
         assertEquals(2L, runnable2.getServiceCallResult().getCallerId());
 
-        // Nachweisen, das der gleiche Service zwei mal aufgerufen wurde
+        // Nachweisen, das der gleiche ServiceImpl zwei mal aufgerufen wurde
         assertEquals(1L, runnable1.getServiceCallResult().getCount());
         assertEquals(1L, runnable2.getServiceCallResult().getCount());
 

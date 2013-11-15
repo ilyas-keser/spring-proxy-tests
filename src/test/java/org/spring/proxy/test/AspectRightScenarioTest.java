@@ -20,7 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * In diesem Testfall liegt der Service selber im {@link ThreadScope} mit seinem
+ * In diesem Testfall liegt der ServiceImpl selber im {@link ThreadScope} mit seinem
  * Aspekt und ist über einen ScopedProxy geschützt. Klassischer Spring-Weg ohne
  * Fehler.
  * 
@@ -43,11 +43,11 @@ public class AspectRightScenarioTest extends BaseTest {
         CallingRetrievalServiceRunnable runnable2 = new CallingRetrievalServiceRunnable(2L, applicationContext);
         startAndWait(new Thread(runnable2));
 
-        // Prüfen, das die Service-Results unterschiedliche CallerIds enthalten
+        // Prüfen, das die ServiceImpl-Results unterschiedliche CallerIds enthalten
         assertEquals(1L, runnable1.getServiceCallResult().getCallerId());
         assertEquals(2L, runnable2.getServiceCallResult().getCallerId());
 
-        // Beide Service-Instanzen müssen jeweils einmal aufgerufen worden sein
+        // Beide ServiceImpl-Instanzen müssen jeweils einmal aufgerufen worden sein
         assertEquals(1L, runnable1.getServiceCallResult().getCount());
         assertEquals(1L, runnable2.getServiceCallResult().getCount());
 
@@ -65,7 +65,7 @@ public class AspectRightScenarioTest extends BaseTest {
         @Bean
         @Scope(value = THREAD_SCOPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
         public Service service() {
-            return new Service();
+            return new ServiceImpl();
         }
 
         @Bean

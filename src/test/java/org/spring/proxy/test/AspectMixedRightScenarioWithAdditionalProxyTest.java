@@ -39,11 +39,11 @@ public class AspectMixedRightScenarioWithAdditionalProxyTest extends BaseTest {
         CallingRetrievalServiceRunnable runnable2 = new CallingRetrievalServiceRunnable(2L, applicationContext);
         startAndWait(new Thread(runnable2));
 
-        // Prüfen, das die Service-Results unterschiedliche CallerIds enthalten
+        // Prüfen, das die ServiceImpl-Results unterschiedliche CallerIds enthalten
         assertEquals(1L, runnable1.getServiceCallResult().getCallerId());
         assertEquals(2L, runnable2.getServiceCallResult().getCallerId());
 
-        // Die eine Service-Instanz muss zweimmal aufgerufen worden sein
+        // Die eine ServiceImpl-Instanz muss zweimmal aufgerufen worden sein
         assertEquals(1L, runnable1.getServiceCallResult().getCount());
         assertEquals(2L, runnable2.getServiceCallResult().getCount());
 
@@ -60,7 +60,7 @@ public class AspectMixedRightScenarioWithAdditionalProxyTest extends BaseTest {
 
         @Bean
         public Service service() {
-            return new Service();
+            return new ServiceImpl();
         }
 
         @Bean
@@ -86,7 +86,7 @@ public class AspectMixedRightScenarioWithAdditionalProxyTest extends BaseTest {
             Class<?>[] classes = {};
             AdvisedSupport config = new AdvisedSupport(classes);
             config.setProxyTargetClass(true);
-            config.setTargetClass(Service.class);
+            config.setTargetClass(ServiceImpl.class);
             config.setTargetSource(new SingletonTargetSource(service));
             CallerIdMethodInterceptor callerIdMethodInterceptor = callerIdMethodInterceptor();
             config.addAdvice(callerIdMethodInterceptor);

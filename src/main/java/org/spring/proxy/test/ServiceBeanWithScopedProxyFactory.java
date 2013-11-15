@@ -14,7 +14,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
 
 /**
- * Erzeugt Service Beans mit einem Scoped Proxy und registriert diese im
+ * Erzeugt ServiceImpl Beans mit einem Scoped Proxy und registriert diese im
  * {@link ApplicationContext}.
  * 
  * @author Olaf Siefart, Senacor Technologies AG
@@ -24,7 +24,7 @@ public class ServiceBeanWithScopedProxyFactory implements BeanFactoryPostProcess
 
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(Service.class);
+        BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(ServiceImpl.class);
         builder.setScope(THREAD_SCOPE);
         AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
         BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(beanDefinition, "threadScopedBean");

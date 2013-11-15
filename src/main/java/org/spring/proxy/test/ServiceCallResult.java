@@ -1,8 +1,8 @@
 package org.spring.proxy.test;
 
 /**
- * Kapselt das Ergebnis eines Service-Aufrufs. Enthält sowohl die Id des
- * Aufrufers, als auch einen Zähler, zum wie oft die Service-Methode nun
+ * Kapselt das Ergebnis eines ServiceImpl-Aufrufs. Enthält sowohl die Id des
+ * Aufrufers, als auch einen Zähler, zum wie oft die ServiceImpl-Methode nun
  * durchlaufen wurde.
  * 
  * @author Olaf Siefart, Senacor Technologies AG

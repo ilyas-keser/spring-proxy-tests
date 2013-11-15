@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * {@link MethodInterceptor}, der die Id des aufrufenden {@link Runnable} als
- * Parameter an der Service überträgt.
+ * Parameter an der ServiceImpl überträgt.
  * 
  * @author Olaf Siefart, Senacor Technologies AG
  * 

@@ -18,7 +18,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * Verschalten eines RetrievalServices im Singleton Scope mit einem Service im
+ * Verschalten eines RetrievalServices im Singleton Scope mit einem ServiceImpl im
  * Thread Scope. Es wird kein ScopeProxy generiert.
  * 
  * Fehlerszenario mit Aufrufen auf der falschen ServiceBean
@@ -45,7 +45,7 @@ public class SimpleWrongScenarioTest extends BaseTest {
         assertEquals(-1L, runnable1.getServiceCallResult().getCallerId());
         assertEquals(-1L, runnable2.getServiceCallResult().getCallerId());
 
-        // Nachweisen, das der gleiche Service zwei mal aufgerufen wurde
+        // Nachweisen, das der gleiche ServiceImpl zwei mal aufgerufen wurde
         assertEquals(1L, runnable1.getServiceCallResult().getCount());
         assertEquals(2L, runnable2.getServiceCallResult().getCount());
 
@@ -62,7 +62,7 @@ public class SimpleWrongScenarioTest extends BaseTest {
         @Bean
         @Scope(value = THREAD_SCOPE)
         public Service service() {
-            return new Service();
+            return new ServiceImpl();
         }
 
         @Bean

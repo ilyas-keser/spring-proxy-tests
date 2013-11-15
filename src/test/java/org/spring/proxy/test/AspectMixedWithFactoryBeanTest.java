@@ -20,18 +20,22 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * In diesem Testfall liegt der ServiceImpl selber im Singleton Scope und der Aspekt
- * im {@link ThreadScope} und ist nicht über einen ScopedProxy geschützt.
+ * In diesem Testfall liegt der ServiceImpl über eine FactoryBean erzeugt, die
+ * ein Singleton erzeugt aber gegenüber Spring als nicht Singleton ausgibt.
+ * Hierdurch denkt Spring, das es eigene Proxys für jeden Injection erzeugen
+ * muss. Damit ist der Context gesichert, solange der mkx-service nicht in eine
+ * andere Singleton Bean injected wird.
  * 
- * Fehlerszenario mit Aufrufen unter der falschen {@link CallerId}.
+ * Fehlerszenario mit Aufrufen unter der falschen {@link CallerId} bei Injection
+ * in Singleton Bean
  * 
  * 
  * @author Olaf Siefart, Senacor Technologies AG
  * 
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = AspectMixedWrongScenarioTest.TestConfiguration.class)
-public class AspectMixedWrongScenarioTest extends BaseTest {
+@ContextConfiguration(classes = AspectMixedWithFactoryBeanTest.TestConfiguration.class)
+public class AspectMixedWithFactoryBeanTest extends BaseTest {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -46,7 +50,8 @@ public class AspectMixedWrongScenarioTest extends BaseTest {
         CallingRetrievalServiceRunnable runnable2 = new CallingRetrievalServiceRunnable(2L, applicationContext);
         startAndWait(new Thread(runnable2));
 
-        // Nachweisen, das die ServiceImpl-Results die gleiche CallerId enthalten
+        // Nachweisen, das die ServiceImpl-Results die gleiche CallerId
+        // enthalten
         assertEquals(1L, runnable1.getServiceCallResult().getCallerId());
         assertEquals(1L, runnable2.getServiceCallResult().getCallerId());
 
@@ -66,9 +71,9 @@ public class AspectMixedWrongScenarioTest extends BaseTest {
         CallingServiceRunnable runnable2 = new CallingServiceRunnable(2L, applicationContext);
         startAndWait(new Thread(runnable2));
 
-        // Nachweisen, das die ServiceImpl-Results die gleiche CallerId enthalten
+        // Unterschiedliche CallerId wegen der Erzeung unter mehreren Proxies
         assertEquals(1L, runnable1.getServiceCallResult().getCallerId());
-        assertEquals(1L, runnable2.getServiceCallResult().getCallerId());
+        assertEquals(2L, runnable2.getServiceCallResult().getCallerId());
 
         // Nachweisen, das der ServiceImpl zwei mal aufgerufen wurde
         assertEquals(1L, runnable1.getServiceCallResult().getCount());
@@ -86,8 +91,8 @@ public class AspectMixedWrongScenarioTest extends BaseTest {
         }
 
         @Bean
-        public Service service() {
-            return new ServiceImpl();
+        public ServiceFactoryBean service() {
+            return new ServiceFactoryBean();
         }
 
         @Bean

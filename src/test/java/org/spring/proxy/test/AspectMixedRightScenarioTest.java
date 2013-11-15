@@ -20,7 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /**
- * In diesem Testfall liegt der Service mit seinem Aspekt im Singleton Scope.
+ * In diesem Testfall liegt der ServiceImpl mit seinem Aspekt im Singleton Scope.
  * Dafür erfolgt der Zugriff auf die CallerId im {@link ThreadScope} und über
  * einen ScopedProxy
  * 
@@ -45,11 +45,11 @@ public class AspectMixedRightScenarioTest extends BaseTest {
         CallingRetrievalServiceRunnable runnable2 = new CallingRetrievalServiceRunnable(2L, applicationContext);
         startAndWait(new Thread(runnable2));
 
-        // Prüfen, das die Service-Results unterschiedliche CallerIds enthalten
+        // Prüfen, das die ServiceImpl-Results unterschiedliche CallerIds enthalten
         assertEquals(1L, runnable1.getServiceCallResult().getCallerId());
         assertEquals(2L, runnable2.getServiceCallResult().getCallerId());
 
-        // Die eine Service-Instanz muss zweimmal aufgerufen worden sein
+        // Die eine ServiceImpl-Instanz muss zweimmal aufgerufen worden sein
         assertEquals(1L, runnable1.getServiceCallResult().getCount());
         assertEquals(2L, runnable2.getServiceCallResult().getCount());
 
@@ -66,7 +66,7 @@ public class AspectMixedRightScenarioTest extends BaseTest {
 
         @Bean
         public Service service() {
-            return new Service();
+            return new ServiceImpl();
         }
 
         @Bean

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Aspect, der die Id des aufrufenden {@link Runnable} als Parameter an der
- * Service überträgt.
+ * ServiceImpl überträgt.
  * 
  * @author Olaf Siefart, Senacor Technologies AG
  * 
